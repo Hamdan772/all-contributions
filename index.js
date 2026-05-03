@@ -5,13 +5,21 @@ import random from "random";
 
 const DATA_FILE = "./data.json";
 const DEFAULT_COUNT = 100;
+const EARLIEST_DATE = moment("2021-01-01").startOf("day");
 
 const countArg = Number.parseInt(process.argv[2] || "", 10);
 const commitCount = Number.isFinite(countArg) && countArg > 0 ? countArg : DEFAULT_COUNT;
 
 const randomPastDate = () => {
-  const daysAgo = random.int(1, 365);
-  return moment().subtract(daysAgo, "d").toISOString();
+  const now = moment();
+  const totalSeconds = now.diff(EARLIEST_DATE, "seconds");
+
+  if (totalSeconds <= 0) {
+    return EARLIEST_DATE.toISOString();
+  }
+
+  const offsetSeconds = random.int(0, totalSeconds);
+  return EARLIEST_DATE.clone().add(offsetSeconds, "seconds").toISOString();
 };
 
 const makeCommits = async (count) => {
